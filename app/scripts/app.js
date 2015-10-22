@@ -1,87 +1,129 @@
-$(document).ready(function() {
+$(document).ready(function () {
 
-var advanceTask = function(task) {
-   var modified = task.innerText.trim()
-   for (var i = 0; i < listo.length; i++) {
-       if (listo[i].task === modified) {
-           if (listo[i].id === 'new') {
-               listo[i].id = 'inProgress';
-           } else if (listo[i].id === 'inProgress') {
-               listo[i].id = 'archived';
-           } else {
-               listo.splice(i, 1);
-           }
-           break;
-       }
-   }
-   task.remove();
-};
+    var listo = [];
 
-$('#newTaskForm').hide();
+   /* if (window.localStorage['myToDoList']) {
 
-
-
-var listo = [];
-
-var Task = function(task) {
-    this.task = task;
-    this.id = 'new';
-}
-
-var addTask = function(task) {
-    if(task) {
-        task = new Task(task);
-        listo.push(task);
+        var myList = JSON.parse(window.localStorage["myToDoList"]);
+        console.log(myList);
         
-        $('#newItemInput').val('');
-        $('#newList').append('<a href="#" class="" id="item"><li class="list-group-item">' + task.task + '<span class="arrow pull-right"><i class="glyphicon glyphicon-arrow-right"></span></li></a>');
+        myList.forEach(function (task) {
+            if (listo.indexOf(task) === -1) {
+                listo.push(task);
+            }
+
+            if (task.id === "new") {
+                addTask(task.task);
+            }
+            else if (task.id === "inProgress") {
+                $('#currentList').append('<a href="#" class="" id="item"><li class="list-group-item">' + task.task + '<span class="arrow pull-right"><i class="glyphicon glyphicon-arrow-right"></span></li></a>');
+            }
+            else {
+                $('#archivedList').append('<a href="#" class="" id="item"><li class="list-group-item">' + task.task + '<span class="arrow pull-right"><i class="glyphicon glyphicon-arrow-right"></span></li></a>');
+            }
+        });
     }
     
-    $('#newTaskForm,  #newListItem').fadeToggle('fast', 'linear');
-};
+    
+    function persistToLocalStorage() {
+        window.localStorage.setItem("myToDoList", JSON.stringify(listo));
+    }
+*/
 
 
-$('#saveNewItem').on('click', function (e) {
-    e.preventDefault();
-    var task = $('#newItemInput').val().trim();
-    addTask(task);
-});
+    function advanceTask(task) {
+        var modified = task.innerText.trim()
+        for (var i = 0; i < listo.length; i++) {
+            if (listo[i].task === modified) {
+                if (listo[i].id === 'new') {
+                    listo[i].id = 'inProgress'; //adds to in Progress
+                } else if (listo[i].id === 'inProgress') { 
+                    listo[i].id = 'archived'; //adds to archived
+                } else {
+                    listo.splice(i, 1); //removes from list
+                }
+                break;
+            }
+        }
+        task.remove();
+    };
 
-//Opens form
-$('#newListItem').on('click', function () {
-    $('#newTaskForm,  #newListItem').fadeToggle('fast', 'linear');
-});
-//closes form
-$('#cancel').on('click', function (e) {
-    e.preventDefault();
-    $('#newTaskForm,  #newListItem').fadeToggle('fast', 'linear');
-});
+    $('#newTaskForm').hide();
 
 
 
-$(document).on('click', '#item', function(e) {
-    e.preventDefault();
-    var task = this;        
-    advanceTask(task);
-    this.id = 'inProgress';
-    $('#currentList').append(this.outerHTML);
 
-});
 
-$(document).on('click', '#inProgress', function (e) {
-    e.preventDefault();
-    var task = this;
-    task.id = "archived";
-    var changeIcon = task.outerHTML.replace('glyphicon-arrow-right', 'glyphicon-remove');
-    advanceTask(task);
-    $('#archivedList').append(changeIcon);
-});
+    function Task(task) {
+        this.task = task;
+        this.id = 'new';
+    }
 
-$(document).on('click', '#archived', function (e) {
-    e.preventDefault();
-    var task = this;
-    advanceTask(task);
-});
+    function addTask(task) {
+        if (task) {
+            task = new Task(task);
+            if (listo.indexOf(task) === -1) {
+                listo.push(task);
+            }
+            $('#newItemInput').val('');
+            $('#newList').append('<a href="#" class="" id="item"><li class="list-group-item">' + task.task + '<span class="arrow pull-right"><i class="glyphicon glyphicon-arrow-right"></span></li></a>');
+        }
+
+        $('#newTaskForm,  #newListItem').fadeToggle('fast', 'linear');
+        //persistToLocalStorage();
+    };
+
+
+    //adds item to list
+    $('#saveNewItem').on('click', function (e) {
+        e.preventDefault();
+        var task = $('#newItemInput').val().trim();
+        addTask(task);
+    });
+
+
+    
+
+    //Opens form
+    $('#newListItem').on('click', function () {
+        $('#newTaskForm,  #newListItem').fadeToggle('fast', 'linear');
+    });
+    //closes form
+    $('#cancel').on('click', function (e) {
+        e.preventDefault();
+        $('#newTaskForm,  #newListItem').fadeToggle('fast', 'linear');
+    });
+
+
+    //Adds to in progress
+    $(document).on('click', '#item', function (e) {
+        e.preventDefault();
+        var task = this;
+        advanceTask(task);
+        this.id = 'inProgress';
+        $('#currentList').append(this.outerHTML);
+        //persistToLocalStorage();
+
+    });
+
+
+    //Adds to archived
+    $(document).on('click', '#inProgress', function (e) {
+        e.preventDefault();
+        var task = this;
+        task.id = "archived";
+        var changeIcon = task.outerHTML.replace('glyphicon-arrow-right', 'glyphicon-remove');
+        advanceTask(task);
+        $('#archivedList').append(changeIcon);
+        //persistToLocalStorage();
+    });
+
+    //Removes from list
+    $(document).on('click', '#archived', function (e) {
+        e.preventDefault();
+        var task = this;
+        advanceTask(task);
+    });
 
 
 
